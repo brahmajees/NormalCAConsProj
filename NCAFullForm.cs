@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace NormalCAConsProj
 {
@@ -24,19 +25,20 @@ namespace NormalCAConsProj
         }
         private void btnInsert_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;");
             con.Open();
             SqlCommand cmd = new SqlCommand("insert into NormalCAHeaderRecord " +
                 "(Record_IDentification,File_IDentification,RTA_Internal_Reference_No,Debit_Credit_Indicator," +
                 "ISIN,CA_Type,Allotment_Date,Allocation_Allotment_Description,Execution_Date," +
                 "Total_Allotted_Quantity_Free_Lockin,Total_Allotted_Quantity_Lockin," +
-                "Total_No_detail_records,Total_Issued_Amount,Total_Paidup_Amount,Stamp_Duty_Payable," +
-                "Basis_calculation_Stamp_Duty,EBP_Name,Funds_collected_through,Filler,MasterUniqNo) " +
+                "Total_No_detail_records,Issue_pr,Paidup_pr,Total_Issued_Amount,Total_Paidup_Amount,Stamp_Duty_Payable," +
+                "Basis_calculation_Stamp_Duty,EBP_Name,Funds_collected_through,Filler,StampDutyPaid,MasterUniqNo) " +
                 "values(@rec_id,@file_idn,@Rta_irno,@Drcr_ind," +
                 "@Isin,@Ca_type,@Allot_Date,@Alloc_allot_desc,@Exec_Date," +
                 "@Totallqtyfli,@Totallqtyli," +
-                "@Tot_detrec,@Totiss_amt,@Totpaid_amt,@Stmp_dutypay," +
-                "@Bc_stmpduty,@Ebp_name,@Funds_colthr,@Filler,@MasterUniqNo)", con);
+                "@Tot_detrec,@Issue_pr,@Paidup_pr,@Totiss_amt,@Totpaid_amt,@Stmp_dutypay," +
+                "@Bc_stmpduty,@Ebp_name,@Funds_colthr,@Filler,@StampDutyPaid,@MasterUniqNo)", con);
 
             cmd.Parameters.AddWithValue("@rec_id", txtRecidentification.Text);
             cmd.Parameters.AddWithValue("@file_idn", txtFileidentification.Text);
@@ -50,12 +52,13 @@ namespace NormalCAConsProj
             var aad = comboBox7.Text.Substring(0, 4);
             cmd.Parameters.AddWithValue("@Alloc_allot_desc", aad);
             cmd.Parameters.AddWithValue("@Exec_Date", dateTimePicker1.Value.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@Totallqtyfli", textBox8.Text);
-            cmd.Parameters.AddWithValue("@Totallqtyli", textBox9.Text);
-            cmd.Parameters.AddWithValue("@Tot_detrec", textBox10.Text);
-            //cmd.Parameters.AddWithValue("@opfv", txtOpfv.Text)
-            cmd.Parameters.AddWithValue("@Totiss_amt", textBox11.Text);
-            cmd.Parameters.AddWithValue("@Totpaid_amt", textBox12.Text);
+            cmd.Parameters.AddWithValue("@Totallqtyfli", txtAllqtyfli.Text);
+            cmd.Parameters.AddWithValue("@Totallqtyli", txtAllqtylin.Text);
+            cmd.Parameters.AddWithValue("@Tot_detrec", txtTotdedrec.Text);
+            cmd.Parameters.AddWithValue("@Issue_pr", txtIP.Text);
+            cmd.Parameters.AddWithValue("@Paidup_pr", txtPP.Text);
+            cmd.Parameters.AddWithValue("@Totiss_amt", txtissamt.Text);
+            cmd.Parameters.AddWithValue("@Totpaid_amt", txtpaidamt.Text);
             var stmp = comboBox2.Text.Substring(0, 1);
             cmd.Parameters.AddWithValue("@Stmp_dutypay", stmp);
             var bcstamp = comboBox3.Text.Substring(0, 2);
@@ -65,6 +68,7 @@ namespace NormalCAConsProj
             var fcthr = comboBox5.Text.Substring(0, 2);
             cmd.Parameters.AddWithValue("@Funds_colthr", fcthr);
             cmd.Parameters.AddWithValue("@Filler", txtFiller01.Text);
+            cmd.Parameters.AddWithValue("@StampDutyPaid", txtSDamount.Text);
             cmd.Parameters.AddWithValue("@MasterUniqNo", txtMastuniqno01.Text);
             // cmd.Parameters.AddWithValue("@normalcauploaduniqueno", txtNormalcauploaduniqueno.Text);
             cmd.ExecuteNonQuery();
@@ -73,7 +77,8 @@ namespace NormalCAConsProj
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;");
             con.Open();
             SqlCommand cmd = new SqlCommand("insert into NormalCADetailRecord (Record_IDentification,Detail_Record_Line_No," +
                 "DP_ID,Client_ID,Client_Account_Category,Allotment_Quantity,Lockin_Reason_Code,Lockin_Release_Date," +
@@ -94,13 +99,7 @@ namespace NormalCAConsProj
             cmd.Parameters.AddWithValue("@Lockin_Reason_Code", linrc);
             cmd.Parameters.AddWithValue("@Lockin_Release_Date", dateTimePicker3.Value.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@Issue_Price", txtIssueprice02.Text);
-
-            //convert(bigint, allotment_quantity) * convert(bigint, Issue_Price)
-            //var totissuedAmt = Convert(double(txtAllotmentquantity)) * Convert(txtIssueprice02.Text.));
-            //var totpaidupAmt = (txtAllotmentquantity * txtPaidupprice02.Text);
-            //cmd.Parameters.AddWithValue("@Issued_Amount", totissuedAmt);
             cmd.Parameters.AddWithValue("@Issued_Amount", txtIssuedamt02.Text);
-            
             cmd.Parameters.AddWithValue("@Paidup_Price", txtPaidupprice02.Text);
             cmd.Parameters.AddWithValue("@Paidup_Amount", txtPaidupamt02.Text);
             cmd.Parameters.AddWithValue("@Filler", txtFiller02.Text);
@@ -115,7 +114,9 @@ namespace NormalCAConsProj
 
         private void btnSave03_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(@"Data Source=VCCIPL-TECH\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //SqlConnection con = new SqlConnection(@"Data Source=VCCIPL-TECH\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;");
+
             con.Open();
 
             SqlCommand cmd = new SqlCommand("insert into NormalCADetailDistRecord (Record_IDentification," +
@@ -147,9 +148,7 @@ namespace NormalCAConsProj
             //txtFromdistinctivenonsdl.Clear();
             //txtTodistinctivenonsdl.Clear();
         }
-
-
-
+        
         private void label2_Click(object sender, EventArgs e)
         {
 
@@ -175,7 +174,9 @@ namespace NormalCAConsProj
 
         private void btnView01_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //< add name = "ConnectionString" connectionString = "Data Source=192.168.0.82,1433;Network Library=DBMSSOCN;Initial Catalog=NewsAdvt;User ID=sa;Password=sql;" providerName = "System.Data.SqlClient" />
+
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;") ;
             con.Open();
             SqlCommand cmd = new SqlCommand("select * from NormalCAHeaderRecord", con);
             SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -186,7 +187,8 @@ namespace NormalCAConsProj
 
         private void btnView02_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;");
             con.Open();
             SqlCommand cmd = new SqlCommand("select * from NormalCADetailRecord", con);
             SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -197,7 +199,8 @@ namespace NormalCAConsProj
 
         private void btnView03_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            //SqlConnection con = new SqlConnection("Data Source=VCCIPL-TECH\\VENTURESQLEXP;Initial Catalog=VCCIPL;Integrated Security=True;");
+            SqlConnection con = new SqlConnection("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User ID=sa;Password=Password123$;Integrated Security = true;");
             con.Open();
             SqlCommand cmd = new SqlCommand("select * from NormalCADetailDistRecord", con);
             SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -212,8 +215,39 @@ namespace NormalCAConsProj
             {
                 txtQuantity.Text = Convert.ToString(Convert.ToInt32(txtTodistinctivenonsdl.Text) - Convert.ToInt32(txtFromdistinctivenonsdl.Text) + 1);
             }
-
         }
 
+        private void txtIP_TextChanged(object sender, EventArgs e)
+        {
+            if (txtIP.Text.Length > 0)
+            {
+                txtissamt.Text = Convert.ToString(Convert.ToInt32(txtIP.Text) * Convert.ToInt32(txtAllqtyfli.Text));
+            }
+        }
+
+        private void txtPP_TextChanged(object sender, EventArgs e)
+        {
+            if (txtPP.Text.Length > 0)
+            {
+                txtpaidamt.Text = Convert.ToString(Convert.ToInt32(txtPP.Text) * Convert.ToInt32(txtAllqtyfli.Text));
+            }
+        }
+
+        private void txtIssueprice02_TextChanged(object sender, EventArgs e)
+        {
+            if (txtIssueprice02.Text.Length > 0)
+            {
+                txtIssuedamt02.Text = Convert.ToString(Convert.ToInt32(txtIssueprice02.Text) * Convert.ToInt32(txtAllotmentquantity.Text));
+            }
+        }
+
+        private void txtPaidupprice02_TextChanged(object sender, EventArgs e)
+        {
+            if (txtPaidupprice02.Text.Length > 0)
+            {
+                txtPaidupamt02.Text = Convert.ToString(Convert.ToInt32(txtPaidupprice02.Text) * Convert.ToInt32(txtAllotmentquantity.Text));
+            }
+
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace NormalCAConsProj.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=VENTURE\\VCCIPLSQLEXP;Initial Catalog=VCCIPL;Integrated Security=True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=192.168.0.138,1433;Initial Catalog=VCCIPL;User Id:Sparkkk;Password:1234567")]
         public string VCCIPLConnectionString {
             get {
                 return ((string)(this["VCCIPLConnectionString"]));
